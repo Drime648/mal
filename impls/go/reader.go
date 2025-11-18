@@ -40,6 +40,50 @@ func tokenize(input string) []string {
 	return tokens
 }
 
+func (r *Reader) readForm() (SExpr, error) {
+	firstToken, err := r.Peek()
+	if err != nil {
+		return nil, err
+	}
+	if firstToken == "(" {
+		sExpr, err := r.readList()
+		if err != nil {
+			return nil, err
+		}
+		return sExpr, nil
+	} else {
+		sExpr, err := r.readAtom()
+		if err != nil {
+			return nil, err
+		}
+		return sExpr, nil
+	}
+}
+
+func (r *Reader) readList() (SExpr, error) {
+	list := List{}
+	for {
+		currToken, err := r.Peek()
+		if err != nil {
+			return nil, err
+		}
+		if currToken == ")" {
+			break
+		} else {
+			sExpr, err := r.readForm()
+			if err != nil {
+				return nil, err
+			}
+			list.values = append(list.values, sExpr)
+		}
+	}
+	return list, nil
+}
+
+func (r *Reader) readAtom() (SExpr, error) {
+	return nil, nil
+}
+
 func read(line string) string {
 	return line
 }
