@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+)
 
 type Reader struct {
 	tokens   []string
@@ -22,6 +25,19 @@ func (r *Reader) Peek() (string, error) {
 	}
 	token := r.tokens[r.position]
 	return token, nil
+}
+
+func readStr(input string) *Reader {
+	tokens := tokenize(input)
+	r := &Reader{tokens: tokens, position: 0}
+	return r
+}
+
+func tokenize(input string) []string {
+	r, _ := regexp.Compile("[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:\\\\.|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}('\"`,;)]*)")
+	tokens := r.FindAllString(input, -1)
+
+	return tokens
 }
 
 func read(line string) string {
