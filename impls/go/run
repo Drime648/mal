@@ -1,2 +1,13 @@
-#!/usr/bin/env bash
-exec $(dirname $0)/${STEP:-stepA_mal} "${@}"
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <step number>"
+  exit 1
+fi
+
+arg=$1
+make "step$arg"
+
+echo "Compilation successful, running ./step$arg"
+
+./step"$arg"
