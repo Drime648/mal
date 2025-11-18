@@ -2,10 +2,6 @@ package main
 
 import "fmt"
 
-func read(line string) string {
-	return line
-}
-
 func eval(line string) string {
 	return line
 }
