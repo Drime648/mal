@@ -1,20 +1,29 @@
 package main
 
-// SExpr can either be an atom or a list of SExprs
-type SExpr interface {
-	isSExpr()
+type SExprType int
+
+const (
+	SExprAtom SExprType = iota
+	SExprList
+)
+
+type SExpr struct {
+	typ  SExprType
+	list []SExpr
+	atom Atom
 }
 
-type List struct {
-	values []SExpr
-}
+type AtomType int
 
-func (List) isSExpr() {}
+const (
+	AtomSymbol AtomType = iota
+	AtomNumber
+)
 
-// Atom is an SExpr, and can either be a Symbol or a Number
-type Atom interface {
-	SExpr
-	isAtom()
+type Atom struct {
+	typ    AtomType
+	symbol Symbol
+	number Number
 }
 
 type Symbol struct {
@@ -24,6 +33,3 @@ type Symbol struct {
 type Number struct {
 	data float64
 }
-
-func (Symbol) isAtom() {}
-func (Number) isAtom() {} // defines the Number as part of an atom

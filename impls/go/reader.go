@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 )
 
 type Reader struct {
@@ -42,26 +43,31 @@ func tokenize(input string) []string {
 
 func (r *Reader) readForm() (SExpr, error) {
 	firstToken, err := r.Peek()
+	sExpr := SExpr{}
 	if err != nil {
-		return nil, err
+		return sExpr, err
 	}
 	if firstToken == "(" {
-		sExpr, err := r.readList()
+		list, err := r.readList()
 		if err != nil {
-			return nil, err
+			return sExpr, err
 		}
+		sExpr.list = list
+		sExpr.typ = SExprList
 		return sExpr, nil
 	} else {
-		sExpr, err := r.readAtom()
+		atom, err := r.readAtom()
 		if err != nil {
-			return nil, err
+			return sExpr, err
 		}
+		sExpr.atom = atom
+		sExpr.typ = SExprAtom
 		return sExpr, nil
 	}
 }
 
-func (r *Reader) readList() (SExpr, error) {
-	list := List{}
+func (r *Reader) readList() ([]SExpr, error) {
+	list := make([]SExpr, 0)
 	for {
 		currToken, err := r.Peek()
 		if err != nil {
@@ -74,14 +80,28 @@ func (r *Reader) readList() (SExpr, error) {
 			if err != nil {
 				return nil, err
 			}
-			list.values = append(list.values, sExpr)
+			list = append(list, sExpr)
 		}
 	}
 	return list, nil
 }
 
-func (r *Reader) readAtom() (SExpr, error) {
-	return nil, nil
+func (r *Reader) readAtom() (Atom, error) {
+	atom := Atom{}
+	atomStr, err := r.Next()
+	if err != nil {
+		return atom, err
+	}
+	num, invalid_number := strconv.ParseFloat(atomStr, 64)
+	if invalid_number == nil { // no error, so it is a valid number
+		atom.typ = AtomNumber
+		atom.number = Number{data: num}
+	} else {
+		atom.typ = AtomSymbol
+		atom.symbol = Symbol{data: atomStr}
+	}
+
+	return atom, nil
 }
 
 func read(line string) string {
