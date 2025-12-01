@@ -2,16 +2,16 @@ package main
 
 import "fmt"
 
-func eval(line string) string {
-	return line
-}
-
-func print(line string) {
-	fmt.Println(line)
+func eval(input SExpr) SExpr {
+	return input
 }
 
 func Rep(input string) {
-	x := read(input)
-	x = eval(x)
-	print(x)
+	sExpr, err := readStr(input)
+	if err != nil {
+		return
+	}
+	sExpr = eval(sExpr)
+	res := printLisp(sExpr)
+	fmt.Println(res)
 }

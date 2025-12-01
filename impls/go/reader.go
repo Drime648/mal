@@ -28,15 +28,31 @@ func (r *Reader) Peek() (string, error) {
 	return token, nil
 }
 
-func readStr(input string) *Reader {
+func readStr(input string) (SExpr, error) {
 	tokens := tokenize(input)
 	r := &Reader{tokens: tokens, position: 0}
-	return r
+	sExpr, err := r.readForm()
+	if err != nil {
+		return sExpr, err
+	}
+	return sExpr, nil
 }
 
 func tokenize(input string) []string {
-	r, _ := regexp.Compile("[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:\\\\.|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}('\"`,;)]*)")
-	tokens := r.FindAllString(input, -1)
+	// regex pattern: [\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)
+	pattern := `[\s,]*(~@|[\[\]{}()'` + "`" + `~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"` + "`" + `,;)]*)`
+	r, _ := regexp.Compile(pattern)
+
+	// FindAllStringSubmatch returns [][]string
+	matches := r.FindAllStringSubmatch(input, -1)
+
+	var tokens []string
+	for _, match := range matches {
+		// match[1] is the first captured group
+		if len(match) > 1 && match[1] != "" {
+			tokens = append(tokens, match[1])
+		}
+	}
 
 	return tokens
 }
@@ -48,6 +64,7 @@ func (r *Reader) readForm() (SExpr, error) {
 		return sExpr, err
 	}
 	if firstToken == "(" {
+		r.Next() // consume the "("
 		list, err := r.readList()
 		if err != nil {
 			return sExpr, err
@@ -104,6 +121,7 @@ func (r *Reader) readAtom() (Atom, error) {
 	return atom, nil
 }
 
-func read(line string) string {
-	return line
-}
+//func getAtomType(atomStr string) AtomType
+//TODO: implement this function once I add more atom types, like booleans and nulls
+//
+//
